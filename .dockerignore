@@ -1,0 +1,9 @@
+audioseal/.git/
+audioseal/.github/
+audioseal/.gitignore
+audioseal/.pre-commit-config.yaml
+
+# Ignore generated files
+**/*.pyc
+
+**/.DS_Store
