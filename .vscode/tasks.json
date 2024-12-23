@@ -1,0 +1,77 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "docker: compose up@gpu-offline",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/docker/up@gpu-offline/"
+            },
+            "command": "docker compose -p audio-seal up"
+        },
+        {
+            "label": "docker: compose up@cpu-online",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/docker/up@cpu-online/"
+            },
+            "command": "docker compose -p audio-seal up"
+        },
+        {
+            "label": "docker: build 0.1.4",
+            "type": "shell",
+            "command": "docker build -t xiaoyao9184/audio-seal:0.1.4 -f ./docker/build@pypi/dockerfile ."
+        },
+        {
+            "label": "docker: build main",
+            "type": "shell",
+            "command": "docker build -t xiaoyao9184/audio-seal:main -f ./docker/build@source/dockerfile ."
+        },
+        {
+            "label": "conda: jupyter run Getting_started notebook",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/audioseal",
+                "env": {
+                    // "HF_ENDPOINT": "https://hf-mirror.com",
+                    // "HF_HUB_ETAG_TIMEOUT": "1000",
+                    // "HF_HUB_DOWNLOAD_TIMEOUT": "1000",
+                    "XDG_CACHE_HOME": "${workspaceFolder}/cache"
+                }
+            },
+            "command": [
+                "conda run --no-capture-output -n audio_seal jupyter notebook ./examples/Getting_started.ipynb"
+            ],
+            "problemMatcher": []
+        },
+        {
+            "label": "huggingface-cli: download models",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}",
+                "env": {
+                    // "HF_ENDPOINT": "https://hf-mirror.com",
+                    // "HF_HUB_ETAG_TIMEOUT": "1000",
+                    // "HF_HUB_DOWNLOAD_TIMEOUT": "1000"
+                }
+            },
+            "command": [
+                "huggingface-cli download --revision main facebook/audioseal generator_base.pth",
+                "&& huggingface-cli download --revision main facebook/audioseal detector_base.pth",
+                "&& mkdir -p ~/.cache/audioseal",
+                "&& cp ~/.cache/huggingface/hub/models--facebook--audioseal/snapshots/199c1793b46a37b682fb3367b8b2dcb443de9d72/generator_base.pth  ~/.cache/audioseal/0f195d476dd87ca1bd7b09e6",
+                "&& cp ~/.cache/huggingface/hub/models--facebook--audioseal/snapshots/199c1793b46a37b682fb3367b8b2dcb443de9d72/detector_base.pth  ~/.cache/audioseal/94c8df0b1d5ea8e45af4c884",
+                "&& mkdir -p ./cache/audioseal",
+                "&& cp ~/.cache/huggingface/hub/models--facebook--audioseal/snapshots/199c1793b46a37b682fb3367b8b2dcb443de9d72/generator_base.pth  ./cache/audioseal/0f195d476dd87ca1bd7b09e6",
+                "&& cp ~/.cache/huggingface/hub/models--facebook--audioseal/snapshots/199c1793b46a37b682fb3367b8b2dcb443de9d72/detector_base.pth  ./cache/audioseal/94c8df0b1d5ea8e45af4c884",
+            ]
+        },
+        {
+            "label": "conda: create env",
+            "type": "shell",
+            "command": [
+                "conda env create -f ./environment.yml"
+            ]
+        }
+    ]
+}
