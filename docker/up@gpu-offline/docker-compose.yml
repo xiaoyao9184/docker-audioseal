@@ -1,0 +1,18 @@
+
+
+services:
+  audio-seal:
+    image: xiaoyao9184/audio-seal:0.1.4
+    container_name: audio-seal-nb
+    environment:
+      - HF_HUB_OFFLINE=true
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./../../cache:/root/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
