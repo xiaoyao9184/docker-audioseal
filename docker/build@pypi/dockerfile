@@ -1,0 +1,33 @@
+ARG AUDIOSEAL_VERSION=0.1.4
+
+
+FROM pytorch/pytorch:2.5.1-cuda12.4-cudnn9-runtime
+
+ARG AUDIOSEAL_VERSION
+
+WORKDIR /app
+
+RUN apt-get update && apt-get install -y \
+    python3-pip \
+    libgl1-mesa-glx \
+    libsm6 \
+    libxext6 \
+    libglib2.0-0 \
+    libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+RUN pip3 install --upgrade pip
+
+RUN pip3 install --no-cache-dir \
+    jupyter==1.1.1 \
+    matplotlib==3.10.0 \
+    soundfile==0.12.1 \
+    audioseal==${AUDIOSEAL_VERSION}
+
+COPY ./audioseal/examples /app/examples
+
+EXPOSE 8888
+
+VOLUME /root/.cache
+
+CMD ["jupyter", "notebook", "--allow-root", "--ip", "0.0.0.0"]
