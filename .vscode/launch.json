@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "debugpy: usage offline",
+            "type": "debugpy",
+            "request": "launch",
+            "program": "${workspaceFolder}/usage.py",
+            "console": "integratedTerminal",
+            "cwd": "${workspaceFolder}/audioseal",
+            "env": {
+                "XDG_CACHE_HOME": "${workspaceFolder}/cache",
+            },
+            "justMyCode": false
+        }
+    ]
+}
