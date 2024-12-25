@@ -15,7 +15,8 @@ RUN apt-get update && apt-get install -y \
 RUN pip3 install --upgrade pip
 
 RUN pip3 install --no-cache-dir \
-    jupyter==1.1.1
+    jupyter==1.1.1 \
+    gradio==5.8.0
 
 COPY ./audioseal/requirements.txt /app/requirements.txt
 RUN pip3 install --no-cache-dir -r requirements.txt
@@ -23,8 +24,14 @@ RUN pip3 install --no-cache-dir -r requirements.txt
 COPY ./audioseal /app
 RUN pip3 install --no-cache-dir -e . soundfile matplotlib
 
+COPY ./gradio /workspace/gradio
+
 EXPOSE 8888
+EXPOSE 7860
 
 VOLUME /root/.cache
+
+ENV APP_PATH=/app
+ENV GRADIO_SERVER_NAME="0.0.0.0"
 
 CMD ["jupyter", "notebook", "--allow-root", "--ip", "0.0.0.0"]

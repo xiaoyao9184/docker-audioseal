@@ -3,6 +3,8 @@ audioseal/.github/
 audioseal/.gitignore
 audioseal/.pre-commit-config.yaml
 
+gradio/requirements.txt
+
 # Ignore generated files
 **/*.pyc
 

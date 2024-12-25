@@ -20,14 +20,20 @@ RUN pip3 install --upgrade pip
 
 RUN pip3 install --no-cache-dir \
     jupyter==1.1.1 \
+    gradio==5.8.0 \
     matplotlib==3.10.0 \
     soundfile==0.12.1 \
     audioseal==${AUDIOSEAL_VERSION}
 
 COPY ./audioseal/examples /app/examples
+COPY ./gradio /workspace/gradio
 
 EXPOSE 8888
+EXPOSE 7860
 
 VOLUME /root/.cache
+
+ENV APP_PATH=/app
+ENV GRADIO_SERVER_NAME="0.0.0.0"
 
 CMD ["jupyter", "notebook", "--allow-root", "--ip", "0.0.0.0"]
