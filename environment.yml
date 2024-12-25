@@ -17,3 +17,5 @@ dependencies:
     - jupyter==1.1.1
     - -r ./audioseal/requirements.txt
     - -e ./audioseal
+    - gradio==5.8.0
+    - matplotlib==3.10.0
