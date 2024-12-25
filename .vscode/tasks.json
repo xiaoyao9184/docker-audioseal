@@ -2,6 +2,22 @@
     "version": "2.0.0",
     "tasks": [
         {
+            "label": "docker: compose up.gradio@gpu-offline",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/docker/up.gradio@gpu-offline/"
+            },
+            "command": "docker compose -p audio-seal up"
+        },
+        {
+            "label": "docker: compose up.gradio@cpu-online",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/docker/up.gradio@cpu-online/"
+            },
+            "command": "docker compose -p audio-seal up"
+        },
+        {
             "label": "docker: compose up@gpu-offline",
             "type": "shell",
             "options": {
@@ -26,6 +42,20 @@
             "label": "docker: build main",
             "type": "shell",
             "command": "docker build -t xiaoyao9184/audio-seal:main -f ./docker/build@source/dockerfile ."
+        },
+        {
+            "label": "conda: run audio-seal gradio",
+            "type": "shell",
+            "options": {
+                "cwd": "${workspaceFolder}/gradio",
+                "env": {
+                    "APP_PATH": "${workspaceFolder}/audioseal",
+                }
+            },
+            "command": [
+                "conda run --no-capture-output -n audio_seal python gradio_app.py"
+            ],
+            "problemMatcher": []
         },
         {
             "label": "conda: jupyter run Getting_started notebook",
