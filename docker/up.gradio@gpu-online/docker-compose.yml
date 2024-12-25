@@ -1,0 +1,18 @@
+
+
+services:
+  audio-seal:
+    image: xiaoyao9184/audio-seal:main
+    container_name: audio-seal-gradio
+    working_dir: /workspace/gradio
+    command: gradio gradio_app.py
+    ports:
+      - "7860:7860"
+    volumes:
+      - ./../../cache:/root/.cache
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              capabilities: [ gpu ]
