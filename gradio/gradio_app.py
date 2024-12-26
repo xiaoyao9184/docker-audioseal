@@ -20,14 +20,18 @@ import random
 import string
 from audioseal import AudioSeal
 
+device = "cuda" if torch.cuda.is_available() else "cpu"
 
 # Load generator if not already loaded in reload mode
 if 'generator' not in globals():
     generator = AudioSeal.load_generator("audioseal_wm_16bits")
+    generator = generator.to(device)
+    generator_nbytes = int(generator.msg_processor.nbits / 8)
 
 # Load detector if not already loaded in reload mode
 if 'detector' not in globals():
     detector = AudioSeal.load_detector("audioseal_detector_16bits")
+    detector = detector.to(device)
 
 
 def load_audio(file):
@@ -44,11 +48,15 @@ def generate_msg_pt_by_format_string(format_string, bytes_count):
         binary_list.append([int(b) for b in binary])
     # torch.randint(0, 2, (1, 16), dtype=torch.int32)
     msg_pt = torch.tensor(binary_list, dtype=torch.int32)
-    return msg_pt
+    return msg_pt.to(device)
 
 def embed_watermark(audio, sr, msg):
     # We add the batch dimension to the single audio to mimic the batch watermarking
-    original_audio = audio.unsqueeze(0)
+    original_audio = audio.unsqueeze(0).to(device)
+
+    # If the audio has more than one channel, average all channels to 1 channel
+    if original_audio.shape[0] > 1:
+        original_audio = torch.mean(original_audio, dim=0, keepdim=True)
 
     watermark = generator.get_watermark(original_audio, sr, message=msg)
 
@@ -73,7 +81,11 @@ def generate_format_string_by_msg_pt(msg_pt, bytes_count):
 
 def detect_watermark(audio, sr):
     # We add the batch dimension to the single audio to mimic the batch watermarking
-    watermarked_audio = audio.unsqueeze(0)
+    watermarked_audio = audio.unsqueeze(0).to(device)
+
+    # If the audio has more than one channel, average all channels to 1 channel
+    if watermarked_audio.shape[0] > 1:
+        watermarked_audio = torch.mean(watermarked_audio, dim=0, keepdim=True)
 
     result, message = detector.detect_watermark(watermarked_audio, sr)
 
@@ -85,8 +97,12 @@ def detect_watermark(audio, sr):
 
     return result, message, pred_prob, message_prob
 
-def get_waveform_and_specgram(batch_waveform, sample_rate):
-    waveform = batch_waveform.squeeze().detach().cpu().numpy()
+def get_waveform_and_specgram(waveform, sample_rate):
+    # If the audio has more than one channel, average all channels to 1 channel
+    if waveform.shape[0] > 1:
+        waveform = torch.mean(waveform, dim=0, keepdim=True)
+
+    waveform = waveform.squeeze().detach().cpu().numpy()
 
     num_frames = waveform.shape[-1]
     time_axis = torch.arange(0, num_frames) / sample_rate
@@ -132,11 +148,10 @@ with gr.Blocks(title="AudioSeal") as demo:
 
                     embedding_type = gr.Radio(["random", "input"], value="random", label="Type", info="Type of watermarks")
 
-                    nbytes = int(generator.msg_processor.nbits / 8)
-                    format_like, regex_pattern = generate_hex_format_regex(nbytes)
-                    msg, _ = generate_hex_random_message(nbytes)
+                    format_like, regex_pattern = generate_hex_format_regex(generator_nbytes)
+                    msg, _ = generate_hex_random_message(generator_nbytes)
                     embedding_msg = gr.Textbox(
-                        label=f"Message ({nbytes} bytes hex string)",
+                        label=f"Message ({generator_nbytes} bytes hex string)",
                         info=f"format like {format_like}",
                         value=msg,
                         interactive=False, show_copy_button=True)
@@ -150,7 +165,7 @@ with gr.Blocks(title="AudioSeal") as demo:
 
             def change_embedding_type(type):
                 if type == "random":
-                    msg, _ = generate_hex_random_message(nbytes)
+                    msg, _ = generate_hex_random_message(generator_nbytes)
                     return gr.update(interactive=False, value=msg)
                 else:
                     return gr.update(interactive=True)
@@ -178,13 +193,13 @@ with gr.Blocks(title="AudioSeal") as demo:
                     raise gr.Error(f"Invalid format. Please use like '{format_like}'", duration=5)
 
                 audio_original, rate = load_audio(file)
-                msg_pt = generate_msg_pt_by_format_string(msg, nbytes)
+                msg_pt = generate_msg_pt_by_format_string(msg, generator_nbytes)
                 audio_watermarked = embed_watermark(audio_original, rate, msg_pt)
                 output = rate, audio_watermarked.squeeze().detach().cpu().numpy().astype(np.float32)
 
                 if show_specgram:
-                    fig_original = get_waveform_and_specgram(audio_original, rate)
-                    fig_watermarked = get_waveform_and_specgram(audio_watermarked, rate)
+                    fig_original = get_waveform_and_specgram(audio_original.squeeze(), rate)
+                    fig_watermarked = get_waveform_and_specgram(audio_watermarked.squeeze(), rate)
                     return [
                         output,
                         gr.update(visible=True, value=fig_original),
@@ -205,8 +220,8 @@ with gr.Blocks(title="AudioSeal") as demo:
             with gr.Row():
                 with gr.Column():
                     detecting_aud = gr.Audio(label="Input Audio", type="filepath")
-                with gr.Column():
                     detecting_btn = gr.Button("Detect Watermark")
+                with gr.Column():
                     predicted_messages = gr.JSON(label="Detected Messages")
 
             def run_detect_watermark(file):
@@ -216,7 +231,7 @@ with gr.Blocks(title="AudioSeal") as demo:
                 audio_watermarked, rate = load_audio(file)
                 result, message, pred_prob, message_prob = detect_watermark(audio_watermarked, rate)
 
-                _, fromat_msg = generate_format_string_by_msg_pt(message[0], nbytes)
+                _, fromat_msg = generate_format_string_by_msg_pt(message[0], generator_nbytes)
 
                 sum_above_05 = (pred_prob[:, 1, :] > 0.5).sum(dim=1)
 

@@ -2,8 +2,12 @@
 
 from audioseal import AudioSeal
 
+import torch
+device = "cuda" if torch.cuda.is_available() else "cpu"
+
 # model name corresponds to the YAML card file name found in audioseal/cards
 model = AudioSeal.load_generator("audioseal_wm_16bits")
+model = model.to(device)
 
 # Other way is to load directly from the checkpoint
 # model =  Watermarker.from_pretrained(checkpoint_path, device = wav.device)
@@ -28,7 +32,7 @@ def download_sample_audio():
 audio, sr = download_sample_audio()
 
 # We add the batch dimension to the single audio to mimic the batch watermarking
-wav = audio.unsqueeze(0)
+wav = audio.unsqueeze(0).to(device)
 
 watermark = model.get_watermark(wav, sr)
 
@@ -39,6 +43,7 @@ watermark = model.get_watermark(wav, sr)
 watermarked_audio = wav + watermark
 
 detector = AudioSeal.load_detector("audioseal_detector_16bits")
+detector = detector.to(device)
 
 # To detect the messages in the high-level.
 result, message = detector.detect_watermark(watermarked_audio, sr)
