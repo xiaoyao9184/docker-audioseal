@@ -14,6 +14,7 @@ RUN apt-get update && apt-get install -y \
     libxext6 \
     libglib2.0-0 \
     libxrender-dev \
+    git \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip3 install --upgrade pip
@@ -21,19 +22,26 @@ RUN pip3 install --upgrade pip
 RUN pip3 install --no-cache-dir \
     jupyter==1.1.1 \
     gradio==5.8.0 \
+    gunicorn==22.0.0 \
+    git+https://github.com/HumanSignal/label-studio-ml-backend.git@master#egg=label-studio-ml \
     matplotlib==3.10.0 \
     soundfile==0.12.1 \
     audioseal==${AUDIOSEAL_VERSION}
 
 COPY ./audioseal/examples /app/examples
 COPY ./gradio /workspace/gradio
+COPY ./label /workspace/label
 
 EXPOSE 8888
 EXPOSE 7860
+EXPOSE 9090
 
 VOLUME /root/.cache
+VOLUME /workspace/label/.pytest_cache
+# VOLUME /workspace/label/cache.db
 
 ENV APP_PATH=/app
 ENV GRADIO_SERVER_NAME="0.0.0.0"
+ENV LABEL_STUDIO_URL=http://label-studio:8080
 
 CMD ["jupyter", "notebook", "--allow-root", "--ip", "0.0.0.0"]

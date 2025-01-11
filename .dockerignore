@@ -5,7 +5,21 @@ audioseal/.pre-commit-config.yaml
 
 gradio/requirements.txt
 
+label/__pycache__/
+label/.pytest_cache/
+label/test_audio/
+label/.gitignore
+label/cache.db
+label/requirements_base.txt
+label/requirements_dev.txt
+label/requirements_text.txt
+label/requirements.txt
+label/test_api.py
+
 # Ignore generated files
 **/*.pyc
 
 **/.DS_Store
+
+# Ignore generated files
+**/cache.db
