@@ -50,22 +50,27 @@ def generate_msg_pt_by_format_string(format_string, bytes_count):
     msg_pt = torch.tensor(binary_list, dtype=torch.int32)
     return msg_pt.to(device)
 
-def embed_watermark(audio, sr, msg):
-    # We add the batch dimension to the single audio to mimic the batch watermarking
-    original_audio = audio.unsqueeze(0).to(device)
+def embed_watermark(audio, sr, msg_pt):
+    original_audio = audio.to(device)
 
     # If the audio has more than one channel, average all channels to 1 channel
     if original_audio.shape[0] > 1:
-        original_audio = torch.mean(original_audio, dim=0, keepdim=True)
+        mono_audio = torch.mean(original_audio, dim=0, keepdim=True)
+    else:
+        mono_audio = original_audio
 
-    watermark = generator.get_watermark(original_audio, sr, message=msg)
+    # We add the batch dimension to the single audio to mimic the batch watermarking
+    batched_audio = mono_audio.unsqueeze(0)
 
-    watermarked_audio = original_audio + watermark
+    watermark = generator.get_watermark(batched_audio, sr, message=msg_pt)
+
+    watermarked_audio = batched_audio + watermark
 
     # Alternatively, you can also call forward() function directly with different tune-down / tune-up rate
     # watermarked_audio = generator(audios, sample_rate=sr, alpha=1)
 
-    return watermarked_audio
+    # Need remove batch dimension and to cpu
+    return watermarked_audio.squeeze(0).detach().cpu()
 
 def generate_format_string_by_msg_pt(msg_pt, bytes_count):
     hex_length = bytes_count * 2
@@ -80,20 +85,24 @@ def generate_format_string_by_msg_pt(msg_pt, bytes_count):
     return hex_string, format_hex
 
 def detect_watermark(audio, sr):
-    # We add the batch dimension to the single audio to mimic the batch watermarking
-    watermarked_audio = audio.unsqueeze(0).to(device)
+    watermarked_audio = audio.to(device)
 
     # If the audio has more than one channel, average all channels to 1 channel
     if watermarked_audio.shape[0] > 1:
-        watermarked_audio = torch.mean(watermarked_audio, dim=0, keepdim=True)
+        mono_audio = torch.mean(watermarked_audio, dim=0, keepdim=True)
+    else:
+        mono_audio = watermarked_audio
 
-    result, message = detector.detect_watermark(watermarked_audio, sr)
+    # We add the batch dimension to the single audio to mimic the batch watermarking
+    batched_audio = mono_audio.unsqueeze(0)
+
+    result, message = detector.detect_watermark(batched_audio, sr)
 
     # pred_prob is a tensor of size batch x 2 x frames, indicating the probability (positive and negative) of watermarking for each frame
     # A watermarked audio should have pred_prob[:, 1, :] > 0.5
     # message_prob is a tensor of size batch x 16, indicating of the probability of each bit to be 1.
     # message will be a random tensor if the detector detects no watermarking from the audio
-    pred_prob, message_prob = detector(watermarked_audio, sr)
+    pred_prob, message_prob = detector(batched_audio, sr)
 
     return result, message, pred_prob, message_prob
 
@@ -195,11 +204,11 @@ with gr.Blocks(title="AudioSeal") as demo:
                 audio_original, rate = load_audio(file)
                 msg_pt = generate_msg_pt_by_format_string(msg, generator_nbytes)
                 audio_watermarked = embed_watermark(audio_original, rate, msg_pt)
-                output = rate, audio_watermarked.squeeze().detach().cpu().numpy().astype(np.float32)
+                output = rate, audio_watermarked.squeeze().numpy().astype(np.float32)
 
                 if show_specgram:
-                    fig_original = get_waveform_and_specgram(audio_original.squeeze(), rate)
-                    fig_watermarked = get_waveform_and_specgram(audio_watermarked.squeeze(), rate)
+                    fig_original = get_waveform_and_specgram(audio_original, rate)
+                    fig_watermarked = get_waveform_and_specgram(audio_watermarked, rate)
                     return [
                         output,
                         gr.update(visible=True, value=fig_original),
