@@ -19,3 +19,7 @@ dependencies:
     - -e ./audioseal
     - gradio==5.8.0
     - matplotlib==3.10.0
+    # for label-studio development and test
+    - -r label/requirements_base.txt
+    - -r label/requirements_dev.txt
+    - -r label/requirements_test.txt
