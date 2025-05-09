@@ -181,7 +181,8 @@ with gr.Blocks(title="AudioSeal") as demo:
             embedding_type.change(
                 fn=change_embedding_type,
                 inputs=[embedding_type],
-                outputs=[embedding_msg]
+                outputs=[embedding_msg],
+                api_name=False
             )
 
             def check_embedding_msg(msg):
@@ -192,7 +193,8 @@ with gr.Blocks(title="AudioSeal") as demo:
             embedding_msg.change(
                 fn=check_embedding_msg,
                 inputs=[embedding_msg],
-                outputs=[]
+                outputs=[],
+                api_name=False
             )
 
             def run_embed_watermark(file, show_specgram, type, msg):
