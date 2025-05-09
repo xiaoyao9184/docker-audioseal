@@ -14,6 +14,7 @@ dependencies:
   # - ffmpeg==4.3
 
   - pip:
+    - torch==2.5.1
     - jupyter==1.1.1
     - -r ./audioseal/requirements.txt
     - -e ./audioseal
