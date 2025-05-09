@@ -13,7 +13,7 @@ services:
     container_name: label-studio
 
   audioseal_label:
-    image: xiaoyao9184/audio-seal:0.1.4
+    image: xiaoyao9184/audio-seal:0.1.7
     container_name: audioseal-label
     working_dir: /workspace/label
     command: label-studio-ml start --root-dir /workspace label

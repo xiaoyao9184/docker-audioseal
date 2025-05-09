@@ -50,9 +50,9 @@
             "command": "docker compose -p audio-seal up"
         },
         {
-            "label": "docker: build 0.1.4",
+            "label": "docker: build 0.1.7",
             "type": "shell",
-            "command": "docker build -t xiaoyao9184/audio-seal:0.1.4 -f ./docker/build@pypi/dockerfile ."
+            "command": "docker build -t xiaoyao9184/audio-seal:0.1.7 -f ./docker/build@pypi/dockerfile ."
         },
         {
             "label": "docker: build main",
