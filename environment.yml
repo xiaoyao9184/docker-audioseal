@@ -19,6 +19,7 @@ dependencies:
     - -r ./audioseal/requirements.txt
     - -e ./audioseal
     - gradio==5.8.0
+    - pydantic==2.10.5
     - matplotlib==3.10.0
     # for label-studio development and test
     - -r label/requirements_base.txt
