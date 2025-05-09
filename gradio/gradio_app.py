@@ -144,7 +144,7 @@ def generate_hex_random_message(bytes_count):
 with gr.Blocks(title="AudioSeal") as demo:
     gr.Markdown("""
     # AudioSeal Demo
-
+    ![](https://badge.mcpx.dev?type=server 'MCP Server')
     Find the project [here](https://github.com/facebookresearch/audioseal.git).
     """)
 
@@ -198,6 +198,21 @@ with gr.Blocks(title="AudioSeal") as demo:
             )
 
             def run_embed_watermark(file, show_specgram, type, msg):
+                """
+                Embeds a watermark into the given audio file and optionally shows spectrograms.
+
+                Args:
+                    file (str): The input file, either a file path.
+                    show_specgram (bool): Whether to return spectrograms for debugging.
+                    type (str): The type of watermark to embed. Accepts "random" or "input".
+                    msg (str):  A 2-byte hex string message to embed, e.g., "FFFF".
+
+                Returns:
+                    tuple:
+                        - filepath: An audio file representing the output with embedded watermark.
+                        - dict: A spectrogram image of the original signal (if show_specgram is True).
+                        - dict: A spectrogram image of the watermark signal (if show_specgram is True).
+                """
                 if file is None:
                     raise gr.Erro("No file uploaded", duration=5)
                 if not re.match(regex_pattern, msg):
@@ -236,6 +251,15 @@ with gr.Blocks(title="AudioSeal") as demo:
                     predicted_messages = gr.JSON(label="Detected Messages")
 
             def run_detect_watermark(file):
+                """
+                Detects a watermark in the given audio file.
+
+                Args:
+                    file (str): Path to the input audio file.
+
+                Returns:
+                    str: A Markdown-formatted string containing detection information.
+                """
                 if file is None:
                     raise gr.Error("No file uploaded", duration=5)
 
@@ -263,4 +287,4 @@ with gr.Blocks(title="AudioSeal") as demo:
             )
 
 if __name__ == "__main__":
-    demo.launch(server_name="0.0.0.0", server_port=7860)
+    demo.launch(server_name="0.0.0.0", server_port=7860, mcp_server=True, ssr_mode=False)

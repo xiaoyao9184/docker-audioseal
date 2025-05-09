@@ -1,10 +1,10 @@
 torch==2.5.1
-gradio==5.8.0
+gradio[mcp]==5.28.0
 huggingface-hub==0.26.3
 audioseal==0.1.7
 matplotlib==3.10.0
 soundfile==0.12.1
 torchaudio==2.5.1
 
-# fix https://github.com/gradio-app/gradio/issues/10662
-pydantic==2.10.5
+# gradio[mcp] 5.28.0 depends on pydantic>=2.11
+pydantic==2.11.4

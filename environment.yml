@@ -18,8 +18,9 @@ dependencies:
     - jupyter==1.1.1
     - -r ./audioseal/requirements.txt
     - -e ./audioseal
-    - gradio==5.8.0
-    - pydantic==2.10.5
+    - gradio[mcp]==5.28.0
+    # gradio[mcp] 5.28.0 depends on pydantic>=2.11
+    - pydantic==2.11.4
     - matplotlib==3.10.0
     # for label-studio development and test
     - -r label/requirements_base.txt
