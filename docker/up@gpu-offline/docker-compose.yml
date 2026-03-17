@@ -2,7 +2,7 @@
 
 services:
   audio-seal:
-    image: xiaoyao9184/audio-seal:0.1.7
+    image: xiaoyao9184/audio-seal:0.1.8
     container_name: audio-seal-nb
     environment:
       - HF_HUB_OFFLINE=true

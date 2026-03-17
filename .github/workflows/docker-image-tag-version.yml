@@ -13,7 +13,7 @@ on:
       audioseal_version:
         description: audioseal version of pypi
         required: true
-        default: 0.1.7
+        default: 0.1.8
 
 jobs:
   build-and-push-docker-image:
@@ -25,7 +25,7 @@ jobs:
     strategy:
       matrix:
         AUDIOSEAL_VERSION:
-          - ${{ github.event.inputs.audioseal_version || '0.1.7' }}
+          - ${{ github.event.inputs.audioseal_version || '0.1.8' }}
         platform:
           - linux/amd64
 

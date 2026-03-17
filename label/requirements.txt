@@ -1,2 +1,2 @@
 soundfile==0.12.1
-audioseal==0.1.7
+audioseal==0.1.8
